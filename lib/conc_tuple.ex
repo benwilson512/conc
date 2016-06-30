@@ -58,6 +58,8 @@ defmodule ConcTuple do
   This function is mostly useful to build higher-level abstractions on top of.
   """
   @spec split(conc_list, ((conc_list, conc_list) -> any)) :: any
+  def split({}), do: raise ArgumentError, "You can't split a null Conc List"
+  def split({x}), do: raise ArgumentError, "You can't split a singleton Conc List"
   def split({left, right}, fun) do
     fun.(left, right)
   end
@@ -192,8 +194,8 @@ defmodule ConcTuple do
   def rebalance({}), do: {}
   def rebalance({xs}), do: list(xs)
   def rebalance(xs = {left, right}) do
-    length_left = Conc.length(left)
-    length_right = Conc.length(right)
+    length_left = ConcTuple.length(left)
+    length_right = ConcTuple.length(right)
 
     # Rebalance This Level
 
