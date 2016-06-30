@@ -124,6 +124,9 @@ defmodule Conc do
   def from_list([x]), do: [x]
   def from_list(list) do
     list
+    |> Enum.map(fn x -> [x] end)
+    |> IO.inspect
+    |> rebalance
   end
 
   ## Fun Stuff
