@@ -140,6 +140,7 @@ defmodule Conc do
   def map_reduce([], id, _, _), do: id
   def map_reduce([x], _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
+    IO.puts "map_reduce called with #{inspect xs}"
     split(xs, &reducing_fun.(map_reduce(&1, id, mapping_fun, reducing_fun), map_reduce(&2, id, mapping_fun, reducing_fun)))
   end
 
@@ -184,7 +185,43 @@ defmodule Conc do
   Rebalances the Conc List so all elements can be accessed with about similar efficiency.
   """
   @spec rebalance(conc_list) :: conc_list
-  def rebalance(xs), do: xs
+  def rebalance(xs)
+
+  def rebalance([]), do: []
+  def rebalance([xs]), do: [xs]
+  def rebalance(xs = [left | right]) do
+    length_left = Conc.length(left)
+    length_right = Conc.length(right)
+
+    # Rebalance This Level
+
+    xs2 =
+      cond do
+        length_left  > length_right -> rebalance(rotate(left, right))
+        length_right > length_left  -> rebalance(rotate(right, left))
+        true -> xs
+      end
+
+    # Rebalance Children
+    case xs2 do
+      [left2 | right2] ->
+        # This is where we can add paralellism in the future.
+        [rebalance(left2) | rebalance(right2)]
+      _ ->
+        xs2
+    end
+  end
+
+
+
+  # What does this do exactly?
+  def rotate(left, right)
+
+  def rotate([],                right ), do: right
+  def rotate(left,              []    ), do: left
+  def rotate([left],            right ), do: [left|right]
+  def rotate([left_a|left_b],  [right]), do: [left_a|[left_b|right]]
+  def rotate([left_a|left_b],   right ), do: [left_a|[left_b|right]]
 
 
 
