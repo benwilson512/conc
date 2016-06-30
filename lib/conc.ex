@@ -45,7 +45,7 @@ defmodule Conc do
   Returns the left partition of the Conc List.
   """
   @spec left(conc_list) :: conc_list
-  def left([left | right]) when left != :s, do: left
+  def left([left | _]) when left != :s, do: left
 
   @doc """
   Returns the right partition of the Conc List.
