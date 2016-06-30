@@ -1,12 +1,23 @@
 defmodule Conc do
 
-  @type empty :: []
-  @type singleton :: [term]
-  @type t :: empty | singleton | [term | term]
+  @moduledoc """
+  This is largely a direct transliteration from
 
+  Organizing Function Code for Parallel Execution by Guy Steele
+  https://vimeo.com/6624203
+
+  The largest change is the standardization of the list as the first argument
+  to most functions following in the Elixir style.
+  """
 
   ## Primatives
   #############
+  def null?([]), do: true
+  def null?(_), do: false
+
+  def singleton?([_]), do: true
+  def singleton?(_), do: false
+
   def item([x]), do: x
 
   # this is necessary because `[x]` is in fact `[x | []]` and we don't want to
@@ -21,7 +32,7 @@ defmodule Conc do
 
   def conc(left, right), do: [left | right]
 
-  ## Other stuff
+  ## Basics
   #####################
 
   def first([]), do: []
@@ -52,6 +63,37 @@ defmodule Conc do
   def from_list(list) do
     list
   end
+
+  ## Fun Stuff
+  #####################
+
+  def map_reduce([], id, _, _), do: id
+  def map_reduce([x], _, f, _), do: f.(x)
+  def map_reduce(xs, id, f, g) do
+    split(xs, &g.(map_reduce(&1, id, f, g), map_reduce(&2, id, f, g)))
+  end
+
+  def map(xs, f) do
+    map_reduce(xs, [], &[f.(&1)], &append/2)
+  end
+
+  def reduce(xs, id, g) do
+    map_reduce(xs, id, &(&1), g)
+  end
+
+  def length(xs) do
+    map_reduce(xs, 0, fn _ -> 1 end, &(&1 + &2))
+  end
+
+  def filter(xs, p) do
+    map_reduce(xs, [], fn x ->
+      if p.(x), do: [x], else: []
+    end,
+    &append/2)
+  end
+
+  ## Utilities
+
 
   def rebalance(xs), do: xs
 
