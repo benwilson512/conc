@@ -19,21 +19,21 @@ defmodule Conc do
   Returns `true` if we have an empty Conc List, `false` for anything else.
   """
   @spec null?(conc_list) :: boolean
-  def null?([]), do: true
+  def null?({}), do: true
   def null?(_), do: false
 
   @doc """
   Returns true if we have a Conc List with exactly one element, `false` for anything else.
   """
   @spec singleton?(conc_list) :: boolean
-  def singleton?([_]), do: true
+  def singleton?({_}), do: true
   def singleton?(_), do: false
 
   @doc """
   Returns the contents of a singleton Conc List.
   """
   @spec item(conc_list) :: boolean
-  def item([x]), do: x
+  def item({x}), do: x
 
   @doc """
   Returns the left partition of the Conc List.
@@ -41,13 +41,13 @@ defmodule Conc do
   # The guard clause is necessary because `[x]` is in fact `[x | []]` and we don't want to
   # treat that as having a real left
   @spec left(conc_list) :: conc_list
-  def left([left | right]) when right != [], do: left
+  def left({left, right}) when right != [], do: left
 
   @doc """
   Returns the right partition of the Conc List.
   """
   @spec right(conc_list) :: conc_list
-  def right([_ | right]) when right != [], do: right
+  def right({_ , right}) when right != [], do: right
 
   @doc """
   Splits the Conc List, and calls the function with `left` as first parameter, and `right` as second.
@@ -55,7 +55,7 @@ defmodule Conc do
   This function is mostly useful to build higher-level abstractions on top of.
   """
   @spec split(conc_list, ((conc_list, conc_list) -> any)) :: any
-  def split([left | right], fun) do
+  def split({left, right}, fun) do
     fun.(left, right)
   end
 
@@ -63,7 +63,7 @@ defmodule Conc do
   Combines two Conc Lists into one.
   """
   @spec conc(conc_list, conc_list) :: conc_list
-  def conc(left, right), do: [left | right]
+  def conc(left, right), do: {left, right}
 
   ## Basics
   #####################
@@ -74,10 +74,10 @@ defmodule Conc do
   TODO: Maybe throw error if empty Conc List?
   """
   @spec first(conc_list) :: any
-  def first([]), do: []
-  def first([x]), do: x
+  def first({}), do: {}
+  def first({x}), do: x
   def first(xs) do
-    split(xs, fn ys, _ -> first(ys) end)
+    split(xs, fn left, _ -> first(left) end)
   end
 
   @doc """
@@ -86,13 +86,11 @@ defmodule Conc do
   TODO: Maybe throw error if empty Conc List?
   """
   @spec rest(conc_list) :: any
-  def rest([]), do: []
-  def rest([_]), do: []
+  def rest({}), do: {}
+  def rest({_}), do: {}
   def rest(xs) do
-    split(xs, fn ys, zs ->
-      ys
-      |> rest
-      |> append(zs)
+    split(xs, fn left, right ->
+      append(rest(left), right)
     end)
   end
 
@@ -100,33 +98,30 @@ defmodule Conc do
   Appends two Conc Lists together.
   """
   @spec append(conc_list, conc_list) :: conc_list
-  def append([], ys), do: ys
-  def append(xs, []), do: xs
-  def append(xs, ys), do: rebalance [xs | ys]
+  def append({}, ys), do: ys
+  def append(xs, {}), do: xs
+  def append(xs, ys), do: rebalance({xs, ys})
 
   @doc """
   Adds a value to the leftmost side (the front) of the Conc List
   """
   @spec add_left(conc_list, any) :: conc_list
-  def add_left(xs, x), do: append([x], xs)
+  def add_left(xs, x), do: append({x}, xs)
 
   @doc """
   Adds a value to the leftmost side (the end) of the Conc List
   """
   @spec add_right(conc_list, any) :: conc_list
-  def add_right(xs, x), do: append(xs, [x])
+  def add_right(xs, x), do: append(xs, {x})
 
   @doc """
   Converts a List into a Conc List
   """
   @spec from_list(list) :: conc_list
-  def from_list([]), do: []
-  def from_list([x]), do: [x]
-  def from_list(list) do
-    list
-    |> Enum.map(fn x -> [x] end)
-    |> IO.inspect
-    |> rebalance
+  def from_list([]), do: {}
+  def from_list([x]), do: {x}
+  def from_list([head|tail]) do
+    rebalance({{head}, from_list(tail)})
   end
 
   ## Fun Stuff
@@ -140,8 +135,8 @@ defmodule Conc do
   @spec map_reduce(conc_list, c, (a -> b), ((b, c) -> c)) :: b when a: any, b: any, c: any
   def map_reduce(xs, id, mapping_fun, reducing_fun)
 
-  def map_reduce([], id, _, _), do: id
-  def map_reduce([x], _, mapping_fun, _), do: mapping_fun.(x)
+  def map_reduce({}, id, _, _), do: id
+  def map_reduce({x}, _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
     IO.puts "map_reduce called with #{inspect xs}"
     split(xs, &reducing_fun.(map_reduce(&1, id, mapping_fun, reducing_fun), map_reduce(&2, id, mapping_fun, reducing_fun)))
@@ -152,7 +147,7 @@ defmodule Conc do
   """
   @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any 
   def map(xs, fun) do
-    map_reduce(xs, [], &[fun.(&1)], &append/2)
+    map_reduce(xs, {}, &{fun.(&1)}, &append/2)
   end
 
   @doc """
@@ -176,8 +171,8 @@ defmodule Conc do
   """
   @spec filter(conc_list, (any -> as_boolean(any))) :: conc_list
   def filter(xs, fun) do
-    map_reduce(xs, [], fn x ->
-      if fun.(x), do: [x], else: []
+    map_reduce(xs, {}, fn x ->
+      if fun.(x), do: {x}, else: {}
     end,
     &append/2)
   end
@@ -190,9 +185,9 @@ defmodule Conc do
   @spec rebalance(conc_list) :: conc_list
   def rebalance(xs)
 
-  def rebalance([]), do: []
-  def rebalance([xs]), do: [xs]
-  def rebalance(xs = [left | right]) do
+  def rebalance({}), do: {}
+  def rebalance({xs}), do: {xs}
+  def rebalance(xs = {left, right}) do
     length_left = Conc.length(left)
     length_right = Conc.length(right)
 
@@ -207,9 +202,9 @@ defmodule Conc do
 
     # Rebalance Children
     case xs2 do
-      [left2 | right2] ->
+      {left2, right2} ->
         # This is where we can add paralellism in the future.
-        [rebalance(left2) | rebalance(right2)]
+        {rebalance(left2), rebalance(right2)}
       _ ->
         xs2
     end
@@ -220,11 +215,11 @@ defmodule Conc do
   # What does this do exactly?
   def rotate(left, right)
 
-  def rotate([],                right ), do: right
-  def rotate(left,              []    ), do: left
-  def rotate([left],            right ), do: [left|right]
-  def rotate([left_a|left_b],  [right]), do: [left_a|[left_b|right]]
-  def rotate([left_a|left_b],   right ), do: [left_a|[left_b|right]]
+  def rotate({},                 right ), do: right
+  def rotate(left,               {}    ), do: left
+  def rotate({left},             right ), do: {left, right}
+  def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, right}}
+  def rotate({left_a, left_b},   right ), do: {left_a, {left_b, right}}
 
 
 
