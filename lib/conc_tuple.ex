@@ -221,10 +221,11 @@ defmodule ConcTuple do
 
     xs2 =
       cond do
-        length_left  > length_right + 2  -> rebalance(rotate(left, right))
-        length_right > length_left  + 2  -> rebalance(rotate(right, left))
+        length_left  > length_right + 2  -> rebalance(rotate(left, right)) |> IO.inspect
+        length_right > length_left  + 2  -> rebalance(rotate(right, left)) |> IO.inspect
         true -> xs
       end
+    IO.puts "xs2 is now: #{inspect xs2}"
 
     # Rebalance Children
     case xs2 do
@@ -238,13 +239,15 @@ defmodule ConcTuple do
 
 
 
-  # What does this do exactly?
+  # Combines left and right, possibly moving the rightmost element from `left` to the start of `right`.
+  # This is basically a tree rotation, https://en.wikipedia.org/wiki/Tree_rotation
+  # i.e.: ({a,b}, c) -> ({a, {b, c}})
   def rotate(left, right)
 
   def rotate({},                 right ), do: right
   def rotate(left,               {}    ), do: left
   def rotate({left},             right ), do: {{left}, right}
-  def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, {right}}}
+  def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, {right}}} # These two last cases are actually the same...
   def rotate({left_a, left_b},   right ), do: {left_a, {left_b, right}}
 
 end
