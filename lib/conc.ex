@@ -135,6 +135,8 @@ defmodule Conc do
   Takes a Conc List, a starting accumulator value, a function to map with, and a function that is used to reduce the results of this map.
   """
   @spec map_reduce(conc_list, any, (any -> any), ((any, any) -> any)) :: any
+  def map_reduce(xs, id, mapping_fun, reducing_fun)
+
   def map_reduce([], id, _, _), do: id
   def map_reduce([x], _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
@@ -149,20 +151,29 @@ defmodule Conc do
     map_reduce(xs, [], &[fun.(&1)], &append/2)
   end
 
+  @doc """
+  Reduces the Conc List to a single value, using the passed accumulator identity and reducing function that takes two elements.
+  """
   @spec reduce(conc_list, any, ((any, any) -> any)) :: any
   def reduce(xs, id, g) do
     map_reduce(xs, id, &(&1), g)
   end
 
+  @doc """
+  Returns the length of the Conc list.
+  """
   @spec length(conc_list) :: integer
   def length(xs) do
     map_reduce(xs, 0, fn _ -> 1 end, &(&1 + &2))
   end
 
+  @doc """
+  Returns a Conc list with all values for which the passed function is truthy, removed.
+  """
   @spec filter(conc_list, (any -> as_boolean(any))) :: conc_list
-  def filter(xs, p) do
+  def filter(xs, fun) do
     map_reduce(xs, [], fn x ->
-      if p.(x), do: [x], else: []
+      if fun.(x), do: [x], else: []
     end,
     &append/2)
   end
