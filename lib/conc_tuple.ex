@@ -109,20 +109,20 @@ defmodule ConcTuple do
   Adds a value to the leftmost side (the front) of the Conc List
   """
   @spec add_left(conc_list, any) :: conc_list
-  def add_left(xs, x), do: append({x}, xs)
+  def add_left(xs, x), do: append(list(x), xs)
 
   @doc """
   Adds a value to the leftmost side (the end) of the Conc List
   """
   @spec add_right(conc_list, any) :: conc_list
-  def add_right(xs, x), do: append(xs, {x})
+  def add_right(xs, x), do: append(xs, list(x))
 
   @doc """
   Converts a List into a Conc List
   """
   @spec from_list(list) :: conc_list
   def from_list([]), do: {}
-  def from_list([x]), do: {x}
+  def from_list([x]), do: list(x)
   def from_list([head|tail]) do
     {{head}, from_list(tail)}
     # |> rebalance
@@ -151,7 +151,7 @@ defmodule ConcTuple do
   """
   @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any 
   def map(xs, fun) do
-    map_reduce(xs, {}, &{fun.(&1)}, &append/2)
+    map_reduce(xs, {}, &list(fun.(&1)), &append/2)
   end
 
   @doc """
@@ -176,7 +176,7 @@ defmodule ConcTuple do
   @spec filter(conc_list, (any -> as_boolean(any))) :: conc_list
   def filter(xs, fun) do
     map_reduce(xs, {}, fn x ->
-      if fun.(x), do: {x}, else: {}
+      if fun.(x), do: list(x), else: {}
     end,
     &append/2)
   end
@@ -190,7 +190,7 @@ defmodule ConcTuple do
   def rebalance(xs)
 
   def rebalance({}), do: {}
-  def rebalance({xs}), do: {xs}
+  def rebalance({xs}), do: list(xs)
   def rebalance(xs = {left, right}) do
     length_left = Conc.length(left)
     length_right = Conc.length(right)
