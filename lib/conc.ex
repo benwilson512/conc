@@ -137,7 +137,7 @@ defmodule Conc do
   @spec to_list(conc_list) :: list
   def to_list(conc_list) do
     conc_list
-    |> reduce([], &[[&1] ++ [&2]])
+    |> reduce([], fn x, y -> [x] ++ [y] end)
     |> :lists.flatten
   end
 

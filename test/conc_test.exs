@@ -42,6 +42,15 @@ defmodule ConcTest do
     assert map(@three, &(&1 * 2)) == [s(2) | [s(4) | s(6)]]
   end
 
+  test "It isn't messed up by values that look like singletons" do
+    item = s(1)
+    conc_list = [item, item, item, item] |> from_list
+
+    item = [1] ++ s(1)
+    expected = [item, item, item, item] |> from_list
+    assert expected == conc_list |> map(&([1] ++ &1))
+  end
+
   test "length" do
     assert Conc.length(@balanced_4) == 4
     assert Conc.length(@unbalanced_4) == 4
