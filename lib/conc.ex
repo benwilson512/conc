@@ -135,7 +135,7 @@ defmodule Conc do
   def map_reduce(xs, id, mapping_fun, reducing_fun)
 
   def map_reduce({}, id, _, _), do: id
-  def map_reduce({x}, _, mapping_fun, _), do: [mapping_fun.(x)]
+  def map_reduce({x}, _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
     IO.puts "map_reduce called with #{inspect xs}"
     split(xs, &reducing_fun.(map_reduce(&1, id, mapping_fun, reducing_fun), map_reduce(&2, id, mapping_fun, reducing_fun)))
