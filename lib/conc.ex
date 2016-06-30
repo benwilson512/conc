@@ -126,10 +126,11 @@ defmodule Conc do
   Converts a List into a Conc List
   """
   @spec from_list(list) :: conc_list
-  def from_list([]), do: []
-  def from_list([x]), do: list(x)
   def from_list(list) do
-    list
+    Enum.reduce(list, [], fn
+      x, [] -> list(x)
+      x, acc -> conc(list(x), acc)
+    end)
   end
 
   ## Fun Stuff
@@ -202,8 +203,6 @@ defmodule Conc do
   """
   @spec rebalance(conc_list) :: conc_list
   def rebalance(xs), do: xs
-
-
 
   use Application
 

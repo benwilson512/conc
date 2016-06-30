@@ -58,7 +58,7 @@ defmodule ConcTest do
     assert split(list, &conc/2) == list
   end
 
-  # test "from_list/1 works" do
-  #   assert Conc.from_list([1,2,3,4]) == [[1|2]|[3|4]]
-  # end
+  test "from_list/1 works" do
+    assert Conc.from_list([1,2,3,4]) == [list(4) | [list(3) | [list(2) | list(1)]]]
+  end
 end
