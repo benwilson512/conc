@@ -42,13 +42,18 @@ defmodule Conc do
 
   def append([], ys), do: ys
   def append(xs, []), do: xs
-  def append(xs, ys), do: [xs | ys]
+  def append(xs, ys), do: rebalance [xs | ys]
+
+  def add_left(xs, x), do: append([x], xs)
+  def add_right(xs, x), do: append(xs, [x])
 
   def from_list([]), do: []
   def from_list([x]), do: [x]
   def from_list(list) do
     list
   end
+
+  def rebalance(xs), do: xs
 
   use Application
 

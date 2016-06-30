@@ -15,6 +15,14 @@ defmodule ConcTest do
     assert rest([[[1]|[2]]|[[3]|[4]]]) == [[2]|[[3]|[4]]]
   end
 
+  test "add_left" do
+    assert add_left([[2]|[[3]|[4]]], 1) == [[1]|[[2]|[[3]|[4]]]]
+  end
+
+  test "add_right" do
+    assert add_right([[2]|[[3]|[4]]], 1) == [[[2]|[[3]|[4]]] | [1]]
+  end
+
   test "split invariant" do
     list = [[[1]|[2]]|[[3]|[4]]]
 
