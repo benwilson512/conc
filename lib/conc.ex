@@ -134,7 +134,7 @@ defmodule Conc do
 
   Takes a Conc List, a starting accumulator value, a function to map with, and a function that is used to reduce the results of this map.
   """
-  @spec map_reduce(conc_list, any, (any -> any), ((any, any) -> any)) :: any
+  @spec map_reduce(conc_list, c, (a -> b), ((b, c) -> c)) :: b when a: any, b: any, c: any
   def map_reduce(xs, id, mapping_fun, reducing_fun)
 
   def map_reduce([], id, _, _), do: id
@@ -146,7 +146,7 @@ defmodule Conc do
   @doc """
   Maps `fun` over each of the elements in the Conc List, and returns a new Conc List with the results. 
   """
-  @spec map(conc_list, (any -> any)) :: conc_list
+  @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any 
   def map(xs, fun) do
     map_reduce(xs, [], &[fun.(&1)], &append/2)
   end
@@ -154,7 +154,7 @@ defmodule Conc do
   @doc """
   Reduces the Conc List to a single value, using the passed accumulator identity and reducing function that takes two elements.
   """
-  @spec reduce(conc_list, any, ((any, any) -> any)) :: any
+  @spec reduce(conc_list, c, ((c, a) -> c)) :: c when a: any, c: any
   def reduce(xs, id, g) do
     map_reduce(xs, id, &(&1), g)
   end
