@@ -60,9 +60,9 @@ defmodule Conc do
   end
 
   @doc """
-  Builds a simple two-element Conc List
+  Combines two Conc Lists into one.
   """
-  @spec conc(any, any) :: conc_list
+  @spec conc(conc_list, conc_list) :: conc_list
   def conc(left, right), do: [left | right]
 
   ## Basics
