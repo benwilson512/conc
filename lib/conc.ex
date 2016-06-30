@@ -128,11 +128,10 @@ defmodule Conc do
   Converts a List into a Conc List
   """
   @spec from_list(list) :: conc_list
-  def from_list(list) do
-    Enum.reduce(list, [], fn
-      x, [] -> list(x)
-      x, acc -> conc(list(x), acc)
-    end)
+  def from_list([]), do: []
+  def from_list([x]), do: s(x)
+  def from_list([h | rest]) do
+    conc(s(h), from_list(rest))
   end
 
   @spec to_list(conc_list) :: list

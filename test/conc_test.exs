@@ -12,6 +12,10 @@ defmodule ConcTest do
     assert s(item(s(1))) == s(1)
   end
 
+  test "conc" do
+    assert conc(s(1), s(2)) == [s(1) | (s(2))]
+  end
+
   test "first" do
     assert first(@balanced_4) == 1
     assert first(@unbalanced_4) == 1
@@ -61,11 +65,11 @@ defmodule ConcTest do
   test "from_list/1 works" do
     assert from_list([]) == []
     assert from_list([1]) == s(1)
-    assert from_list([1,2,3,4]) == [s(4) | [s(3) | [s(2) | s(1)]]]
+    assert from_list([1,2,3,4]) == [s(1) | [s(2) | [s(3) | s(4)]]]
   end
 
   test "to_list/1 works" do
     assert to_list(@balanced_4) == [1,2,3,4]
-    assert to_list(from_list([1,2,3,4])) == [4,3,2,1]
+    assert to_list(from_list([1,2,3,4])) == [1,2,3,4]
   end
 end
