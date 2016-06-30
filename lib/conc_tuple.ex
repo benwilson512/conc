@@ -133,14 +133,15 @@ defmodule ConcTuple do
   def to_list(xs) do
     reduce(xs, [], 
       fn 
-        x, acc -> [x|acc]
-    end) |> IO.inspect |> fix_improper_list_end
+        x, acc -> [x] ++ [acc]
+    end) |> IO.inspect |> :lists.flatten
   end
 
-  # I believe that this is a better solution than using `:lists.flatten` as you might flatten too much in that case.
-  def fix_improper_list_end([]), do: []
-  def fix_improper_list_end([hd|tl]) when not(is_list(tl)), do: [hd|[tl]]
-  def fix_improper_list_end([hd|tl]), do: [hd|fix_improper_list_end(tl)]
+  # I believe that this might be a better solution than using `:lists.flatten` as you might flatten too much in that case.
+  # But it isn't completely working in the last version.
+  # def fix_improper_list_end([]), do: []
+  # def fix_improper_list_end([hd|tl]) when not(is_list(tl)), do: [hd|[tl]]
+  # def fix_improper_list_end([hd|tl]), do: [hd|fix_improper_list_end(tl)]
 
   ## Fun Stuff
   #####################
@@ -221,8 +222,8 @@ defmodule ConcTuple do
 
     xs2 =
       cond do
-        length_left  > length_right + 2  -> rebalance(rotate(left, right)) |> IO.inspect
-        length_right > length_left  + 2  -> rebalance(rotate(right, left)) |> IO.inspect
+        length_left  >= length_right + 2  -> rebalance(rot_right(left, right)) |> IO.inspect
+        length_right >= length_left  + 2  -> rebalance(rot_left(left,  right)) |> IO.inspect
         true -> xs
       end
     IO.puts "xs2 is now: #{inspect xs2}"
@@ -242,12 +243,23 @@ defmodule ConcTuple do
   # Combines left and right, possibly moving the rightmost element from `left` to the start of `right`.
   # This is basically a tree rotation, https://en.wikipedia.org/wiki/Tree_rotation
   # i.e.: ({a,b}, c) -> ({a, {b, c}})
-  def rotate(left, right)
+  # def rotate(left, right)
 
-  def rotate({},                 right ), do: right
-  def rotate(left,               {}    ), do: left
-  def rotate({left},             right ), do: {{left}, right}
-  def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, {right}}} # These two last cases are actually the same...
-  def rotate({left_a, left_b},   right ), do: {left_a, {left_b, right}}
+  # def rotate({},                 right ), do: right
+  # def rotate(left,               {}    ), do: left
+  # def rotate({left},             right ), do: {{left}, right}
+  # def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, {right}}} # These two last cases are actually the same...
+  # def rotate({left_a, left_b},   right ), do: {left_a, {left_b, right}}
+
+
+  def rot_right({}, right), do: right
+  def rot_right(left, {}), do: left
+  def rot_right({left}, right), do: {{left}, right}
+  def rot_right({left_a, left_b}, right), do: {left_a, {left_b, right}}
+
+  def rot_left({}, right), do: right
+  def rot_left(left, {}), do: left
+  def rot_left(left, {right}), do: {left, {right}}
+  def rot_left(left, {right_a, right_b}), do: {{left, right_a}, right_b}
 
 end
