@@ -13,7 +13,7 @@ defmodule Conc do
   ## Primitives
   #############
 
-  @opaque conc_list :: maybe_improper_list
+  @type conc_list :: maybe_improper_list
 
   @doc """
   Returns `true` if we have an empty Conc List, `false` for anything else.
