@@ -44,7 +44,7 @@ defmodule ConcTuple do
   Returns the left partition of the Conc List.
   """
   @spec left(conc_list) :: conc_list
-  def left({left, right}), do: left
+  def left({left, _}), do: left
 
   @doc """
   Returns the right partition of the Conc List.
@@ -130,6 +130,18 @@ defmodule ConcTuple do
     # |> rebalance
   end
 
+  def to_list(xs) do
+    reduce(xs, [], 
+      fn 
+        x, acc -> [x|acc]
+    end) |> IO.inspect |> fix_improper_list_end
+  end
+
+  # I believe that this is a better solution than using `:lists.flatten` as you might flatten too much in that case.
+  def fix_improper_list_end([]), do: []
+  def fix_improper_list_end([hd|tl]) when not(is_list(tl)), do: [hd|[tl]]
+  def fix_improper_list_end([hd|tl]), do: [hd|fix_improper_list_end(tl)]
+
   ## Fun Stuff
   #####################
 
@@ -196,33 +208,33 @@ defmodule ConcTuple do
   Rebalances the Conc List so all elements can be accessed with about similar efficiency.
   """
   @spec rebalance(conc_list) :: conc_list
-  def rebalance(xs), do: xs
+  def rebalance(xs)#, do: xs
 
 
-  # def rebalance({}), do: {}
-  # def rebalance({xs}), do: list(xs)
-  # def rebalance(xs = {left, right}) do
-  #   length_left = ConcTuple.length(left)
-  #   length_right = ConcTuple.length(right)
+  def rebalance({}), do: {}
+  def rebalance({x}), do: list(x)
+  def rebalance(xs = {left, right}) do
+    length_left = ConcTuple.length(left)
+    length_right = ConcTuple.length(right)
 
-  #   # Rebalance This Level
+    # Rebalance This Level
 
-  #   xs2 =
-  #     cond do
-  #       length_left  > length_right -> rebalance(rotate(left, right))
-  #       length_right > length_left  -> rebalance(rotate(right, left))
-  #       true -> xs
-  #     end
+    xs2 =
+      cond do
+        length_left  > length_right + 2  -> rebalance(rotate(left, right))
+        length_right > length_left  + 2  -> rebalance(rotate(right, left))
+        true -> xs
+      end
 
-  #   # Rebalance Children
-  #   case xs2 do
-  #     {left2, right2} ->
-  #       # This is where we can add paralellism in the future.
-  #       {rebalance(left2), rebalance(right2)}
-  #     _ ->
-  #       xs2
-  #   end
-  # end
+    # Rebalance Children
+    case xs2 do
+      {left2, right2} ->
+        # This is where we can add paralellism in the future.
+        {rebalance(left2), rebalance(right2)}
+      _ ->
+        xs2
+    end
+  end
 
 
 
@@ -231,8 +243,8 @@ defmodule ConcTuple do
 
   def rotate({},                 right ), do: right
   def rotate(left,               {}    ), do: left
-  def rotate({left},             right ), do: {left, right}
-  def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, right}}
+  def rotate({left},             right ), do: {{left}, right}
+  def rotate({left_a, left_b},  {right}), do: {left_a, {left_b, {right}}}
   def rotate({left_a, left_b},   right ), do: {left_a, {left_b, right}}
 
 end
