@@ -13,7 +13,7 @@ defmodule ConcTuple do
   ## Primitives
   #############
 
-  @type conc_list :: maybe_improper_list
+  @type conc_list :: {} | {any} | {any, any}
 
   @doc """
   Returns `true` if we have an empty Conc List, `false` for anything else.
@@ -58,8 +58,8 @@ defmodule ConcTuple do
   This function is mostly useful to build higher-level abstractions on top of.
   """
   @spec split(conc_list, ((conc_list, conc_list) -> any)) :: any
-  def split({}), do: raise ArgumentError, "You can't split a null Conc List"
-  def split({_}), do: raise ArgumentError, "You can't split a singleton Conc List"
+  def split({}, fun), do: raise ArgumentError, "You can't split a null Conc List"
+  def split({_}, fun), do: raise ArgumentError, "You can't split a singleton Conc List"
   def split({left, right}, fun) do
     fun.(left, right)
   end
@@ -67,7 +67,7 @@ defmodule ConcTuple do
   @doc """
   Combines two Conc Lists into one.
   """
-  @spec conc(conc_list, conc_list) :: conc_list
+  @spec conc(conc_list, conc_list) :: {any, any}
   def conc(left, right), do: {left, right}
 
   ## Basics
@@ -222,8 +222,8 @@ defmodule ConcTuple do
 
     xs2 =
       cond do
-        length_left  >= length_right + 2  -> rebalance(rot_right(left, right)) |> IO.inspect
-        length_right >= length_left  + 2  -> rebalance(rot_left(left,  right)) |> IO.inspect
+        length_left  > length_right + 2  -> rebalance(rot_right(left, right)) |> IO.inspect
+        length_right > length_left  + 2  -> rebalance(rot_left(left,  right)) |> IO.inspect
         true -> xs
       end
     IO.puts "xs2 is now: #{inspect xs2}"
