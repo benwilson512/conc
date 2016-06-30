@@ -44,15 +44,15 @@ defmodule ConcTest do
   end
 
   test "filter" do
-    assert filter([[s(1)|s(2)]|[s(3)|s(4)]], &(rem(&1, 2) == 0)) == [s(2) | s(4)]
+    assert filter([[s(1) | s(2)] | [s(3) | s(4)]], &(rem(&1, 2) == 0)) == [s(2) | s(4)]
   end
 
   test "reverse" do
-    assert reverse([[s(1)|s(2)]|[s(3)|s(4)]]) == [[s(4)|s(3)]|[s(2)|s(1)]]
+    assert reverse([[s(1) | s(2)] | [s(3) | s(4)]]) == [[s(4) | s(3)] | [s(2) | s(1)]]
   end
 
   test "split invariant" do
-    list = [[s(1)|s(2)]|[s(3)|s(4)]]
+    list = [[s(1) | s(2)] | [s(3) | s(4)]]
 
     assert conc(left(list), right(list)) == list
     assert split(list, &conc/2) == list
