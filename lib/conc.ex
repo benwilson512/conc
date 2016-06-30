@@ -35,6 +35,8 @@ defmodule Conc do
   @spec list(a) :: [:s | a] when a: any
   def list(x), do: [:s | x]
 
+  def s(x), do: list(x)
+
   @doc """
   Returns the contents of a singleton Conc List.
   """
