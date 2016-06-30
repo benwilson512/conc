@@ -38,16 +38,14 @@ defmodule Conc do
   @doc """
   Returns the left partition of the Conc List.
   """
-  # The guard clause is necessary because `[x]` is in fact `[x | []]` and we don't want to
-  # treat that as having a real left
   @spec left(conc_list) :: conc_list
-  def left({left, right}) when right != [], do: left
+  def left({left, right}), do: left
 
   @doc """
   Returns the right partition of the Conc List.
   """
   @spec right(conc_list) :: conc_list
-  def right({_ , right}) when right != [], do: right
+  def right({_ , right}), do: right
 
   @doc """
   Splits the Conc List, and calls the function with `left` as first parameter, and `right` as second.
