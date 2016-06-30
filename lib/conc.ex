@@ -5,7 +5,6 @@ defmodule Conc do
   @type t :: empty | singleton | [term | term]
 
 
-
   ## Primatives
   #############
   def item([x]), do: x
@@ -31,14 +30,15 @@ defmodule Conc do
     split(xs, fn ys, _ -> first(ys) end)
   end
 
-  # def rest([]), do: []
-  # def rest([_]), do: []
-  # def rest(xs) do
-  #   xs |> IO.inspect
-  #   split(xs, fn ys, zs ->
-  #     append(rest(ys), zs)
-  #   end)
-  # end
+  def rest([]), do: []
+  def rest([_]), do: []
+  def rest(xs) do
+    split(xs, fn ys, zs ->
+      ys
+      |> rest
+      |> append(zs)
+    end)
+  end
 
   def append([], ys), do: ys
   def append(xs, []), do: xs
