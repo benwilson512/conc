@@ -59,7 +59,7 @@ defmodule ConcTuple do
   """
   @spec split(conc_list, ((conc_list, conc_list) -> any)) :: any
   def split({}), do: raise ArgumentError, "You can't split a null Conc List"
-  def split({x}), do: raise ArgumentError, "You can't split a singleton Conc List"
+  def split({_}), do: raise ArgumentError, "You can't split a singleton Conc List"
   def split({left, right}, fun) do
     fun.(left, right)
   end
@@ -105,7 +105,7 @@ defmodule ConcTuple do
   @spec append(conc_list, conc_list) :: conc_list
   def append({}, ys), do: ys
   def append(xs, {}), do: xs
-  def append(xs, ys), do: rebalance({xs, ys})
+  def append(xs, ys), do: {xs, ys} |> rebalance
 
   @doc """
   Adds a value to the leftmost side (the front) of the Conc List
@@ -145,7 +145,10 @@ defmodule ConcTuple do
   def map_reduce({x}, _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
     IO.puts "map_reduce called with #{inspect xs}"
-    split(xs, &reducing_fun.(map_reduce(&1, id, mapping_fun, reducing_fun), map_reduce(&2, id, mapping_fun, reducing_fun)))
+    split(xs, &reducing_fun.(
+      map_reduce(&1, id, mapping_fun, reducing_fun), 
+      map_reduce(&2, id, mapping_fun, reducing_fun)
+    ))
   end
 
   @doc """
@@ -183,38 +186,43 @@ defmodule ConcTuple do
     &append/2)
   end
 
+  def reverse(xs) do
+    map_reduce(xs, {}, &list/1, fn ys, zs -> append(zs, ys) end)
+  end
+
   ## Utilities
 
   @doc """
   Rebalances the Conc List so all elements can be accessed with about similar efficiency.
   """
   @spec rebalance(conc_list) :: conc_list
-  def rebalance(xs)
+  def rebalance(xs), do: xs
 
-  def rebalance({}), do: {}
-  def rebalance({xs}), do: list(xs)
-  def rebalance(xs = {left, right}) do
-    length_left = ConcTuple.length(left)
-    length_right = ConcTuple.length(right)
 
-    # Rebalance This Level
+  # def rebalance({}), do: {}
+  # def rebalance({xs}), do: list(xs)
+  # def rebalance(xs = {left, right}) do
+  #   length_left = ConcTuple.length(left)
+  #   length_right = ConcTuple.length(right)
 
-    xs2 =
-      cond do
-        length_left  > length_right -> rebalance(rotate(left, right))
-        length_right > length_left  -> rebalance(rotate(right, left))
-        true -> xs
-      end
+  #   # Rebalance This Level
 
-    # Rebalance Children
-    case xs2 do
-      {left2, right2} ->
-        # This is where we can add paralellism in the future.
-        {rebalance(left2), rebalance(right2)}
-      _ ->
-        xs2
-    end
-  end
+  #   xs2 =
+  #     cond do
+  #       length_left  > length_right -> rebalance(rotate(left, right))
+  #       length_right > length_left  -> rebalance(rotate(right, left))
+  #       true -> xs
+  #     end
+
+  #   # Rebalance Children
+  #   case xs2 do
+  #     {left2, right2} ->
+  #       # This is where we can add paralellism in the future.
+  #       {rebalance(left2), rebalance(right2)}
+  #     _ ->
+  #       xs2
+  #   end
+  # end
 
 
 
