@@ -32,7 +32,11 @@ defmodule ConcTest do
   end
 
   test "filter" do
-    assert filter([[[1]|[2]]|[[3]|[4]]], &(rem(&1, 2) == 0)) == [[2], 4]
+    assert filter([[[1]|[2]]|[[3]|[4]]], &(rem(&1, 2) == 0)) == [[2] | [4]]
+  end
+
+  test "reverse" do
+    assert reverse([[[1]|[2]]|[[3]|[4]]]) == [[[4]|[3]]|[[2]|[1]]]
   end
 
   test "split invariant" do

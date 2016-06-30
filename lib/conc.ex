@@ -69,8 +69,8 @@ defmodule Conc do
   #####################
 
   @doc """
-  Returns the first element of the Conc List.  
-  
+  Returns the first element of the Conc List.
+
   TODO: Maybe throw error if empty Conc List?
   """
   @spec first(conc_list) :: any
@@ -81,8 +81,8 @@ defmodule Conc do
   end
 
   @doc """
-  Returns anything but the first element of the Conc List.  
-  
+  Returns anything but the first element of the Conc List.
+
   TODO: Maybe throw error if empty Conc List?
   """
   @spec rest(conc_list) :: any
@@ -144,9 +144,9 @@ defmodule Conc do
   end
 
   @doc """
-  Maps `fun` over each of the elements in the Conc List, and returns a new Conc List with the results. 
+  Maps `fun` over each of the elements in the Conc List, and returns a new Conc List with the results.
   """
-  @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any 
+  @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any
   def map(xs, fun) do
     map_reduce(xs, [], &[fun.(&1)], &append/2)
   end
@@ -176,6 +176,14 @@ defmodule Conc do
       if fun.(x), do: [x], else: []
     end,
     &append/2)
+  end
+
+  @doc """
+  Reverse a Conc list
+  """
+  @spec reverse(conc_list) :: conc_list
+  def reverse(xs) do
+    map_reduce(xs, [], &[&1], &append(&2, &1))
   end
 
   ## Utilities
