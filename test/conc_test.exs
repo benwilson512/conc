@@ -59,6 +59,13 @@ defmodule ConcTest do
   end
 
   test "from_list/1 works" do
+    assert Conc.from_list([]) == []
+    assert Conc.from_list([1]) == list(1)
     assert Conc.from_list([1,2,3,4]) == [list(4) | [list(3) | [list(2) | list(1)]]]
+  end
+
+  test "to_list/1 works" do
+    assert Conc.to_list(@balanced_4) == [1,2,3,4]
+    assert Conc.to_list(Conc.from_list([1,2,3,4])) == [4,3,2,1]
   end
 end

@@ -133,6 +133,14 @@ defmodule Conc do
     end)
   end
 
+  @spec to_list(conc_list) :: list
+  def to_list(conc_list) do
+    conc_list
+    |> reduce([], &[[&1] ++ [&2]])
+    |> :lists.flatten
+  end
+
+
   ## Fun Stuff
   #####################
 
