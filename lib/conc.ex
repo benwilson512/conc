@@ -24,34 +24,42 @@ defmodule Conc do
   Returns true if we have a Conc List with exactly one element, `false` for anything else.
   """
   @spec singleton?(conc_list) :: boolean
-  def singleton?([_]), do: true
+  def singleton?([:s | _]), do: true
   def singleton?(_), do: false
+
+  @doc """
+  Create a singleton list
+  """
+  @spec list(a) :: [:s | a] when a: any
+  def list(x), do: [:s | x]
+
+  def s(x), do: list(x)
 
   @doc """
   Returns the contents of a singleton Conc List.
   """
   @spec item(conc_list) :: boolean
-  def item([x]), do: x
+  def item([:s | x]), do: x
 
   @doc """
   Returns the left partition of the Conc List.
   """
-  # The guard clause is necessary because `[x]` is in fact `[x | []]` and we don't want to
-  # treat that as having a real left
   @spec left(conc_list) :: conc_list
-  def left([left | right]) when right != [], do: left
+  def left([left | _]) when left != :s, do: left
 
   @doc """
   Returns the right partition of the Conc List.
   """
   @spec right(conc_list) :: conc_list
-  def right([_ | right]) when right != [], do: right
+  def right([left | right]) when left != :s, do: right
 
   @doc """
   Splits the Conc List, and calls the function with `left` as first parameter, and `right` as second.
   This function is mostly useful to build higher-level abstractions on top of.
   """
   @spec split(conc_list, ((conc_list, conc_list) -> any)) :: any
+  def split([]), do: raise ArgumentError, "You can't split a null list"
+  def split([:s | _]), do: raise ArgumentError, "You can't split a singleton list"
   def split([left | right], fun) do
     fun.(left, right)
   end
@@ -67,22 +75,20 @@ defmodule Conc do
 
   @doc """
   Returns the first element of the Conc List.
-  TODO: Maybe throw error if empty Conc List?
   """
   @spec first(conc_list) :: any
   def first([]), do: []
-  def first([x]), do: x
+  def first([:s | x]), do: x
   def first(xs) do
     split(xs, fn ys, _ -> first(ys) end)
   end
 
   @doc """
   Returns anything but the first element of the Conc List.
-  TODO: Maybe throw error if empty Conc List?
   """
   @spec rest(conc_list) :: any
   def rest([]), do: []
-  def rest([_]), do: []
+  def rest([:s | _]), do: []
   def rest(xs) do
     split(xs, fn ys, zs ->
       ys
@@ -103,23 +109,31 @@ defmodule Conc do
   Adds a value to the leftmost side (the front) of the Conc List
   """
   @spec add_left(conc_list, any) :: conc_list
-  def add_left(xs, x), do: append([x], xs)
+  def add_left(xs, x), do: append(list(x), xs)
 
   @doc """
   Adds a value to the leftmost side (the end) of the Conc List
   """
   @spec add_right(conc_list, any) :: conc_list
-  def add_right(xs, x), do: append(xs, [x])
+  def add_right(xs, x), do: append(xs, list(x))
 
   @doc """
   Converts a List into a Conc List
   """
   @spec from_list(list) :: conc_list
   def from_list([]), do: []
-  def from_list([x]), do: [x]
-  def from_list(list) do
-    list
+  def from_list([x]), do: s(x)
+  def from_list([h | rest]) do
+    conc(s(h), from_list(rest))
   end
+
+  @spec to_list(conc_list) :: list
+  def to_list(conc_list) do
+    conc_list
+    |> reduce([], fn x, y -> [x] ++ [y] end)
+    |> :lists.flatten
+  end
+
 
   ## Fun Stuff
   #####################
@@ -132,9 +146,12 @@ defmodule Conc do
   def map_reduce(xs, id, mapping_fun, reducing_fun)
 
   def map_reduce([], id, _, _), do: id
-  def map_reduce([x], _, mapping_fun, _), do: mapping_fun.(x)
+  def map_reduce([:s | x], _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
-    split(xs, &reducing_fun.(map_reduce(&1, id, mapping_fun, reducing_fun), map_reduce(&2, id, mapping_fun, reducing_fun)))
+    split(xs, &reducing_fun.(
+      map_reduce(&1, id, mapping_fun, reducing_fun),
+      map_reduce(&2, id, mapping_fun, reducing_fun)
+    ))
   end
 
   @doc """
@@ -142,7 +159,7 @@ defmodule Conc do
   """
   @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any
   def map(xs, fun) do
-    map_reduce(xs, [], &[fun.(&1)], &append/2)
+    map_reduce(xs, [], &list(fun.(&1)), &append/2)
   end
 
   @doc """
@@ -167,7 +184,7 @@ defmodule Conc do
   @spec filter(conc_list, (any -> as_boolean(any))) :: conc_list
   def filter(xs, fun) do
     map_reduce(xs, [], fn x ->
-      if fun.(x), do: [x], else: []
+      if fun.(x), do: list(x), else: []
     end,
     &append/2)
   end
@@ -177,7 +194,7 @@ defmodule Conc do
   """
   @spec reverse(conc_list) :: conc_list
   def reverse(xs) do
-    map_reduce(xs, [], &[&1], &append(&2, &1))
+    map_reduce(xs, [], &list(&1), &append(&2, &1))
   end
 
   ## Utilities
@@ -187,8 +204,6 @@ defmodule Conc do
   """
   @spec rebalance(conc_list) :: conc_list
   def rebalance(xs), do: xs
-
-
 
   use Application
 

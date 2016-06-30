@@ -58,8 +58,8 @@ defmodule ConcTuple do
   This function is mostly useful to build higher-level abstractions on top of.
   """
   @spec split(conc_list, ((conc_list, conc_list) -> any)) :: any
-  def split({}, fun), do: raise ArgumentError, "You can't split a null Conc List"
-  def split({_}, fun), do: raise ArgumentError, "You can't split a singleton Conc List"
+  def split({}, _), do: raise ArgumentError, "You can't split a null Conc List"
+  def split({_}, _), do: raise ArgumentError, "You can't split a singleton Conc List"
   def split({left, right}, fun) do
     fun.(left, right)
   end
@@ -74,8 +74,8 @@ defmodule ConcTuple do
   #####################
 
   @doc """
-  Returns the first element of the Conc List.  
-  
+  Returns the first element of the Conc List.
+
   TODO: Maybe throw error if empty Conc List?
   """
   @spec first(conc_list) :: any
@@ -86,8 +86,8 @@ defmodule ConcTuple do
   end
 
   @doc """
-  Returns anything but the first element of the Conc List.  
-  
+  Returns anything but the first element of the Conc List.
+
   TODO: Maybe throw error if empty Conc List?
   """
   @spec rest(conc_list) :: any
@@ -131,10 +131,10 @@ defmodule ConcTuple do
   end
 
   def to_list(xs) do
-    reduce(xs, [], 
-      fn 
+    reduce(xs, [],
+      fn
         x, acc -> [x] ++ [acc]
-    end) |> IO.inspect |> :lists.flatten
+    end) |> :lists.flatten
   end
 
   # I believe that this might be a better solution than using `:lists.flatten` as you might flatten too much in that case.
@@ -157,17 +157,16 @@ defmodule ConcTuple do
   def map_reduce({}, id, _, _), do: id
   def map_reduce({x}, _, mapping_fun, _), do: mapping_fun.(x)
   def map_reduce(xs, id, mapping_fun, reducing_fun) do
-    IO.puts "map_reduce called with #{inspect xs}"
     split(xs, &reducing_fun.(
-      map_reduce(&1, id, mapping_fun, reducing_fun), 
+      map_reduce(&1, id, mapping_fun, reducing_fun),
       map_reduce(&2, id, mapping_fun, reducing_fun)
     ))
   end
 
   @doc """
-  Maps `fun` over each of the elements in the Conc List, and returns a new Conc List with the results. 
+  Maps `fun` over each of the elements in the Conc List, and returns a new Conc List with the results.
   """
-  @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any 
+  @spec map(conc_list, (a -> b)) :: conc_list when a: any, b: any
   def map(xs, fun) do
     map_reduce(xs, {}, &list(fun.(&1)), &append/2)
   end
@@ -222,11 +221,10 @@ defmodule ConcTuple do
 
     xs2 =
       cond do
-        length_left  > length_right + 2  -> rebalance(rot_right(left, right)) |> IO.inspect
-        length_right > length_left  + 2  -> rebalance(rot_left(left,  right)) |> IO.inspect
+        length_left  > length_right + 2  -> rebalance(rot_right(left, right))
+        length_right > length_left  + 2  -> rebalance(rot_left(left,  right))
         true -> xs
       end
-    IO.puts "xs2 is now: #{inspect xs2}"
 
     # Rebalance Children
     case xs2 do
