@@ -85,7 +85,7 @@ defmodule Conc do
   
   TODO: Maybe throw error if empty Conc List?
   """
-  @spec first(conc_list) :: any
+  @spec rest(conc_list) :: any
   def rest([]), do: []
   def rest([_]), do: []
   def rest(xs) do
