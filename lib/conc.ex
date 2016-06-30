@@ -149,7 +149,7 @@ defmodule Conc do
     map_reduce(xs, [], &[fun.(&1)], &append/2)
   end
 
-  @spec reduce(conc_list, any, (any -> any)) :: any
+  @spec reduce(conc_list, any, ((any, any) -> any)) :: any
   def reduce(xs, id, g) do
     map_reduce(xs, id, &(&1), g)
   end
