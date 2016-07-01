@@ -13,7 +13,10 @@ defmodule ConcTuple do
   ## Primitives
   #############
 
-  @type conc_list :: {} | {any} | {any, any}
+  @type conc_list_empty :: {}
+  @type conc_list_singleton :: {any}
+  @type conc_list_concat :: {conc_list, conc_list}
+  @type conc_list :: conc_list_empty | conc_list_singleton | conc_list_concat
 
   @doc """
   Returns `true` if we have an empty Conc List, `false` for anything else.
@@ -38,6 +41,7 @@ defmodule ConcTuple do
   @doc """
   Wraps `x` in a Conc List
   """
+  @spec list(any) :: {any}
   def list(x), do: {x}
 
   @doc """
@@ -67,7 +71,7 @@ defmodule ConcTuple do
   @doc """
   Combines two Conc Lists into one.
   """
-  @spec conc(conc_list, conc_list) :: {any, any}
+  @spec conc(conc_list, conc_list) :: conc_list_concat
   def conc(left, right), do: {left, right}
 
   ## Basics
